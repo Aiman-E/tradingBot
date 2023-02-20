@@ -72,6 +72,9 @@ class TradingBot():
 if __name__ == '__main__':
   bot = TradingBot()
   symbol = "USTC-USDT"
+  symbol2 = "SHIB-USDT"
   price = float(bot.client.getPrice(symbol))
-  bot.startTrade(symbol, price, 1.9, price - 0.000005, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
+  price2 = float(bot.client.getPrice(symbol2))
+  bot.startTrade(symbol, price, 1.9, price - price*0.001, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
+  bot.startTrade(symbol2, price2, 2, price2 - price2*0.001, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
   bot.run()

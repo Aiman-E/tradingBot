@@ -42,7 +42,7 @@ class Trade():
     return 1 if self.config & ORDER_CONFIG.LONG else -1
 
   def getSubtradeThreshold(self):
-    if self.config == ORDER_CONFIG.LONG:
+    if self.config & ORDER_CONFIG.LONG:
       return self.subtrade.entry*(1+self.subtradeThreshold/100)
     return self.subtrade.entry*(1-self.subtradeThreshold/100)
     
