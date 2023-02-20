@@ -14,8 +14,9 @@ class TradingBot():
     
     for i in details['positions']:
       self.trades.append(Trade(i['positionId'], symbol, i['avgPrice'], i['margin'], loss, lev, config))
-
     print(self.trades[0])
+
+    
 
   def startSubTrade(self, trade):
     print(self.client.openOrder(trade.symbol, 
@@ -33,7 +34,7 @@ class TradingBot():
                 trade.loss, 
                 trade.leverage,
                 (ORDER_CONFIG.LONG if trade.config & ORDER_CONFIG.SHORT else ORDER_CONFIG.SHORT) | ORDER_CONFIG.MARKET))
-        print(f"created subtrade {trade.subtrade}")
+        print(f"created subtrade {trade.subtrade}") 
 
   def endTrade(self, trade):
     self.client.close(trade.symbol, trade.id)
@@ -48,19 +49,21 @@ class TradingBot():
     while 1:
       x+=1
       for trade in self.trades:
-        # Addes subtrade if not exist
+        # Adds subtrade if not exist
         if not trade.subtrade:
           price = float(self.client.getPrice(trade.symbol))
+          s = trade.getTradeSign()
           print(f"{x}Price: {price} - Loss: {trade.loss}")
-          if price <= trade.loss:
+          if s*price <= s*trade.loss:
             self.startSubTrade(trade)
             print("subtrade Done")
 
         # check subtrade
         else:
           price = float(self.client.getPrice(trade.symbol))
-          print(f"{x}Pprice: {price} - Loss: {trade.getSubtradeThreshold()}")
-          if price >= trade.getSubtradeThreshold():
+          s = trade.getTradeSign() #equality flips when multiplied with minus
+          print(f"{x}Pprice: {s*price} - Loss: {s*trade.getSubtradeThreshold()}")
+          if s*price >= s*trade.getSubtradeThreshold():
             print(self.client.close(trade.subtrade.symbol, trade.subtrade.id))
             trade.subtrade = None
             print("Cloding subtrade")
@@ -70,5 +73,5 @@ if __name__ == '__main__':
   bot = TradingBot()
   symbol = "USTC-USDT"
   price = float(bot.client.getPrice(symbol))
-  bot.startTrade(symbol, price, 1.9, price - 0.000002, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
+  bot.startTrade(symbol, price, 1.9, price - 0.000005, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
   bot.run()

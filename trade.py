@@ -9,7 +9,7 @@ class Trade():
   leverage = 0.0
   config = None
   subtrade = None
-  subtradeThreshold = .03
+  subtradeThreshold = .06
 
   def __init__(self, id, symbol, entry, amount, loss, lev, config) -> None:
     self.id = id
@@ -38,9 +38,13 @@ class Trade():
   def setSubtrade(self, subtrade):
     self.subtrade = subtrade
 
-  def getSubtradeThreshold(self):
-    sign = 1 if self.config & ORDER_CONFIG.LONG else -1
-    return sign * (self.subtrade.entry*(1+self.subtradeThreshold/100))
+  def getTradeSign(self):
+    return 1 if self.config & ORDER_CONFIG.LONG else -1
 
+  def getSubtradeThreshold(self):
+    if self.config == ORDER_CONFIG.LONG:
+      return self.subtrade.entry*(1+self.subtradeThreshold/100)
+    return self.subtrade.entry*(1-self.subtradeThreshold/100)
+    
   def __str__(self) -> str:
     return f"<TRADE ID:{self.id}> symbol:{self.symbol} - entry:{self.entry} - amount:{self.amount} - loss:{self.loss} - leverage:{self.leverage} - config:{self.config}"
