@@ -2,4 +2,4 @@
 
 Helper BOT for hedge trading
 
-** Early publish, untest on multiple assests
+** Early publish, untested on multiple assests
