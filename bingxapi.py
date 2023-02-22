@@ -4,7 +4,7 @@ import json
 
 from bingX.perpetual.v1 import Perpetual
 from bingX.perpetual.v1 import market
-import time 
+
 
 class ORDER_CONFIG(Flag):
   LONG = auto()
@@ -13,11 +13,16 @@ class ORDER_CONFIG(Flag):
   LIMIT = auto()
 
 class BingxClient():
-  APIKEY = "2Ohbn3NBvAiBSAbjtwzAKMOXvpcSqCtdXxqK9XFHF56ouSjcai56CHydcFpI0g5IStjh3GbGd9YftZAIew"
-  SECRETKEY = "RgVYyNap7rCIa5mkD5DehhcIPnoIdeJvIJ89kBOL4sMs94sKxMqfQydrGhJofRGSSVY5Go6vmXZvIKrvhMLXg"
+  APIKEY = ""
+  SECRETKEY = ""
   CLIENT = None
 
   def __init__(self) -> None:
+    f = open('./credentials.txt')
+    credentials = json.load(f)['credentials']
+    self.APIKEY = credentials['APIKEY']
+    self.SECRETKEY = credentials['SECRETKEY']
+    print(f"apikey: {self.APIKEY}\nsecretkey:{self.SECRETKEY}")
     self.CLIENT = Perpetual(self.APIKEY, self.SECRETKEY)
   
   def getPrice(self, symbol) -> str:
@@ -36,6 +41,19 @@ class BingxClient():
     
     elif config == ORDER_CONFIG.SHORT | ORDER_CONFIG.LIMIT:
       return self.CLIENT.place_order(symbol, "Ask", entry, value, "Limit", "Open")
+
+  def openOrderWithVolume(self, symbol, entry, amount, config):
+    if config == ORDER_CONFIG.LONG | ORDER_CONFIG.MARKET:
+      return self.CLIENT.place_order(symbol, "Bid", entry, amount, "Market", "Open")
+
+    elif config == ORDER_CONFIG.LONG | ORDER_CONFIG.LIMIT:
+      return self.CLIENT.place_order(symbol, "Bid", entry, amount, "Limit", "Open")
+
+    elif config == ORDER_CONFIG.SHORT | ORDER_CONFIG.MARKET:
+      return self.CLIENT.place_order(symbol, "Ask", entry, amount, "Market", "Open")
+    
+    elif config == ORDER_CONFIG.SHORT | ORDER_CONFIG.LIMIT:
+      return self.CLIENT.place_order(symbol, "Ask", entry, amount, "Limit", "Open")
 
   def trim(self, symbol, entry, amount, side):
     if side == ORDER_CONFIG.LONG:
@@ -58,6 +76,6 @@ if __name__=='__main__':
   price = float(client.getPrice(symbol))
   old = price
 
-  orderid = client.openOrder(symbol, price, 1.9, ORDER_CONFIG.LONG | ORDER_CONFIG.MARKET)['orderId']
+  # orderid = client.openOrder(symbol, price, 1.9, ORDER_CONFIG.LONG | ORDER_CONFIG.MARKET)['orderId']
   
   

@@ -4,18 +4,20 @@ class Trade():
   id = ""
   symbol = ""
   entry = 0.0
-  amount = 0.0
+  margin = 0.0
+  volume = 0.0
   loss = 0.0
   leverage = 0.0
   config = None
   subtrade = None
-  subtradeThreshold = .06
+  subtradeThreshold = .2
 
-  def __init__(self, id, symbol, entry, amount, loss, lev, config) -> None:
+  def __init__(self, id, symbol, entry, margin, volume, loss, lev, config) -> None:
     self.id = id
     self.symbol = symbol
     self.entry = entry
-    self.amount = amount
+    self.margin = margin
+    self.volume = volume
     self.loss = loss
     self.leverage = lev
     self.config = config
@@ -26,9 +28,12 @@ class Trade():
   def setEntry(self, x):
     self.entry = x
 
-  def setAmount(self, x):
-    self.amount = x
-    
+  def setMargin(self, x):
+    self.margin = x
+
+  def setVolume(self, x):
+    self.volume = x
+
   def setLoss(self, x):
     self.loss = x
 
@@ -47,4 +52,4 @@ class Trade():
     return self.subtrade.entry*(1-self.subtradeThreshold/100)
     
   def __str__(self) -> str:
-    return f"<TRADE ID:{self.id}> symbol:{self.symbol} - entry:{self.entry} - amount:{self.amount} - loss:{self.loss} - leverage:{self.leverage} - config:{self.config}"
+    return f"<TRADE ID:{self.id}> symbol:{self.symbol} - entry:{self.entry} - margin:{self.margin} - volume:{self.volume} - loss:{self.loss} - leverage:{self.leverage} - config:{self.config}"

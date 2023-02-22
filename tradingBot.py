@@ -13,15 +13,16 @@ class TradingBot():
     details = self.client.getPositionDetails(symbol)
     
     for i in details['positions']:
-      self.trades.append(Trade(i['positionId'], symbol, i['avgPrice'], i['margin'], loss, lev, config))
+      self.trades.append(Trade(i['positionId'], symbol, i['avgPrice'], i['margin'], i['volume'], loss, lev, config))
     print(self.trades[0])
 
     
 
   def startSubTrade(self, trade):
-    print(self.client.openOrder(trade.symbol, 
+    print(trade)
+    print(self.client.openOrderWithVolume(trade.symbol, 
       trade.loss, 
-      trade.amount, 
+      trade.volume, 
       (ORDER_CONFIG.LONG if trade.config & ORDER_CONFIG.SHORT else ORDER_CONFIG.SHORT) | ORDER_CONFIG.MARKET))
 
     details = self.client.getPositionDetails(symbol)
@@ -30,7 +31,8 @@ class TradingBot():
         trade.setSubtrade(Trade(i['positionId'], 
                 trade.symbol, 
                 i['avgPrice'], 
-                i['margin'], 
+                i['margin'],
+                i['volume'],
                 trade.loss, 
                 trade.leverage,
                 (ORDER_CONFIG.LONG if trade.config & ORDER_CONFIG.SHORT else ORDER_CONFIG.SHORT) | ORDER_CONFIG.MARKET))
@@ -71,10 +73,10 @@ class TradingBot():
 
 if __name__ == '__main__':
   bot = TradingBot()
-  symbol = "USTC-USDT"
-  symbol2 = "SHIB-USDT"
+  symbol = "BONK-USDT"
+  # symbol2 = "SHIB-USDT"
   price = float(bot.client.getPrice(symbol))
-  price2 = float(bot.client.getPrice(symbol2))
-  bot.startTrade(symbol, price, 1.9, price - price*0.001, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
-  bot.startTrade(symbol2, price2, 2, price2 - price2*0.001, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
+  # price2 = float(bot.client.getPrice(symbol2))
+  bot.startTrade(symbol, price, 2.2, price + price*(.3/100), 25, ORDER_CONFIG.SHORT  | ORDER_CONFIG.MARKET)
+  # bot.startTrade(symbol2, price2, 2, price2 - price2*0.001, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
   bot.run()
