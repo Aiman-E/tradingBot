@@ -2,4 +2,5 @@
 
 Helper BOT for hedge trading
 
-** Early publish, untested on multiple assests
+# CREDENTIALS
+  store api and secret keys in credentials.txt in json format
