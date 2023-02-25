@@ -2,7 +2,7 @@ from bingxapi import *
 from trade import *
 class TradingBot():
   client = None
-  trades = []
+  trades = {}
 
   def __init__(self) -> None:
     self.client = BingxClient()
@@ -10,13 +10,19 @@ class TradingBot():
   def startTrade(self, symbol, entry, amount, loss, lev, config):
     self.client.openOrder(symbol, entry, amount, config)
 
+    trades = []
     details = self.client.getPositionDetails(symbol)
     
     for i in details['positions']:
-      self.trades.append(Trade(i['positionId'], symbol, i['avgPrice'], i['margin'], i['volume'], loss, lev, config))
-    print(self.trades[0])
-
-    
+      trades.append(Trade(i['positionId'],
+       symbol,
+       i['avgPrice'],
+       i['margin'], 
+       i['volume'], 
+       loss, 
+       lev, 
+       config))
+    self.trades[symbol] = trades
 
   def startSubTrade(self, trade):
     print(trade)
@@ -47,28 +53,29 @@ class TradingBot():
 
   def run(self):
     x = 0
-
+    
     while 1:
       x+=1
-      for trade in self.trades:
-        # Adds subtrade if not exist
-        if not trade.subtrade:
-          price = float(self.client.getPrice(trade.symbol))
-          s = trade.getTradeSign()
-          print(f"{x}Price: {price} - Loss: {trade.loss}")
-          if s*price <= s*trade.loss:
-            self.startSubTrade(trade)
-            print("subtrade Done")
+      for t in self.trades.values():
+        for trade in t:
+          # Adds subtrade if not exist
+          if not trade.subtrade:
+            price = float(self.client.getPrice(trade.symbol))
+            s = trade.getTradeSign()
+            print(f"{x}Price: {price} - Loss: {trade.loss}")
+            if s*price <= s*trade.loss:
+              self.startSubTrade(trade)
+              print("subtrade Done")
 
-        # check subtrade
-        else:
-          price = float(self.client.getPrice(trade.symbol))
-          s = trade.getTradeSign() #equality flips when multiplied with minus
-          print(f"{x}Pprice: {s*price} - Loss: {s*trade.getSubtradeThreshold()}")
-          if s*price >= s*trade.getSubtradeThreshold():
-            print(self.client.close(trade.subtrade.symbol, trade.subtrade.id))
-            trade.subtrade = None
-            print("Cloding subtrade")
+          # check subtrade
+          else:
+            price = float(self.client.getPrice(trade.symbol))
+            s = trade.getTradeSign() #equality flips when multiplied with minus
+            print(f"{x}Pprice: {s*price} - Loss: {s*trade.getSubtradeThreshold()}")
+            if s*price >= s*trade.getSubtradeThreshold():
+              self.endTrade(trade.subtrade)
+              trade.subtrade = None
+              print("Closing subtrade")
 
 
 if __name__ == '__main__':
@@ -77,6 +84,7 @@ if __name__ == '__main__':
   # symbol2 = "SHIB-USDT"
   price = float(bot.client.getPrice(symbol))
   # price2 = float(bot.client.getPrice(symbol2))
-  bot.startTrade(symbol, price, 2.2, price + price*(.3/100), 25, ORDER_CONFIG.SHORT  | ORDER_CONFIG.MARKET)
+  bot.startTrade(symbol, price, 2.2, price + price*(.3/100), 1, ORDER_CONFIG.SHORT  | ORDER_CONFIG.MARKET)
   # bot.startTrade(symbol2, price2, 2, price2 - price2*0.001, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
+  
   bot.run()
