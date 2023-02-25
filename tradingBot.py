@@ -10,6 +10,7 @@ class TradingBot():
   def startTrade(self, symbol, entry, amount, loss, lev, config):
     self.client.openOrder(symbol, entry, amount, config)
 
+
     trades = []
     details = self.client.getPositionDetails(symbol)
     
@@ -56,26 +57,31 @@ class TradingBot():
     
     while 1:
       x+=1
-      for t in self.trades.values():
-        for trade in t:
-          # Adds subtrade if not exist
-          if not trade.subtrade:
-            price = float(self.client.getPrice(trade.symbol))
-            s = trade.getTradeSign()
-            print(f"{x}Price: {price} - Loss: {trade.loss}")
-            if s*price <= s*trade.loss:
-              self.startSubTrade(trade)
-              print("subtrade Done")
+      try:
+        for t in self.trades.values():
+          for trade in t:
+            # Adds subtrade if not exist
+            if not trade.subtrade:
+              price = float(self.client.getPrice(trade.symbol))
+              s = trade.getTradeSign()
+              print(f"{x}Price: {price} - Loss: {trade.loss}")
+              if s*price <= s*trade.loss:
+                self.startSubTrade(trade)
+                print("subtrade Done")
 
-          # check subtrade
-          else:
-            price = float(self.client.getPrice(trade.symbol))
-            s = trade.getTradeSign() #equality flips when multiplied with minus
-            print(f"{x}Pprice: {s*price} - Loss: {s*trade.getSubtradeThreshold()}")
-            if s*price >= s*trade.getSubtradeThreshold():
-              self.endTrade(trade.subtrade)
-              trade.subtrade = None
-              print("Closing subtrade")
+            # check subtrade
+            else:
+              price = float(self.client.getPrice(trade.symbol))
+              s = trade.getTradeSign() #equality flips when multiplied with minus
+              print(f"{x}Pprice: {s*price} - Loss: {s*trade.getSubtradeThreshold()}")
+              if s*price >= s*trade.getSubtradeThreshold():
+                self.endTrade(trade.subtrade)
+                trade.subtrade = None
+                print("Closing subtrade")
+      except KeyboardInterrupt:
+        return
+      except:
+        print("Connection lost, trying again...")
 
 
 if __name__ == '__main__':
