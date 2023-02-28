@@ -14,7 +14,7 @@ class Context():
     imgui.create_context()
 
     #Init glfw
-    width, height = 500, 500
+    width, height = 1000, 700
     window_name = ""
 
     if not glfw.init():
@@ -39,7 +39,7 @@ class Context():
     self.impl.shutdown()
     glfw.terminate()
 
-  def render(self, externalImgui=None) -> None:
+  def render(self, externalImgui=None, *args, **kwargs) -> None:
     glfw.poll_events()
     self.impl.process_inputs()
     imgui.new_frame()
@@ -48,7 +48,7 @@ class Context():
     gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
     if externalImgui:
-      externalImgui()
+      externalImgui(args, kwargs)
 
     imgui.render()
     self.impl.render(imgui.get_draw_data())
@@ -58,10 +58,18 @@ class Context():
   def shouldClose(self):
     return glfw.window_should_close(self.window)
 
-def main():
-  context = Context()
-  while not context.shouldClose():
-    context.render()
+
+def imguiCommands():  
+    from imguiCommands import imguiTrade
+    imgui.show_demo_window()
+
+
+
 
 if __name__ == '__main__':
-  main()
+  from trade import Trade
+  from bingxapi import ORDER_CONFIG
+  
+  context = Context()
+  while not context.shouldClose():  
+    context.render(imguiCommands)
