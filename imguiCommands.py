@@ -35,6 +35,8 @@ def imguiTradeList(bot:TradingBot):
     
 
 def imguiTradeDetails(bot:TradingBot):
+  global _selectedTrade
+
   if _selectedTrade == '': return
   windowSize = imgui.get_window_size()
   imgui.begin_child(bot.trades[_selectedTrade][0].symbol, windowSize[0] *0.4, 0.0, True)
@@ -50,6 +52,12 @@ def imguiTradeDetails(bot:TradingBot):
   imgui.text(f"config: {bot.trades[_selectedTrade][0].config}")
   imgui.text(f"Subtrade: {bot.trades[_selectedTrade][0].subtrade}")
   imgui.text(f"Subtrade Threshhold: {bot.trades[_selectedTrade][0].subtradeThreshold}")
+  if imgui.button("Close trade"):
+    temp = _selectedTrade
+    _selectedTrade = ""
+    bot.endTrade(temp)
+    imgui.end_child()
+    return
   imgui.end_child()
 
   imgui.same_line(spacing=20)

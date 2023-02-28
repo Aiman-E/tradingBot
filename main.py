@@ -48,12 +48,6 @@ def main(b):
         CONTEXT.render(imguiCommands, bot=b)
         
 
-
-def startBOT(bot):
-    while 1:
-        bot.update()
-
-
 if __name__=='__main__':
     BotManager.register("BOT", TradingBot, BotProxy)
     manager = BotManager()

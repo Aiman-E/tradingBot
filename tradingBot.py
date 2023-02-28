@@ -78,8 +78,11 @@ class TradingBot():
                 (ORDER_CONFIG.LONG if trade.config & ORDER_CONFIG.SHORT else ORDER_CONFIG.SHORT) | ORDER_CONFIG.MARKET))
         print(f"created subtrade {trade.subtrade}") 
 
-  def endTrade(self, trade):
-    self.client.close(trade.symbol, trade.id)
+  def endTrade(self, symbol):
+    if self.trades[symbol][0].subtrade:
+      self.client.close(symbol, self.trades[symbol][0].subtrade.id)
+    self.client.close(symbol, self.trades[symbol][0].id)
+    self.trades.pop(symbol)
 
   def getStoplossRate(self, trade):
     #(final/initial-1)*100
