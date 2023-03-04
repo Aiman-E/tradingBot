@@ -60,7 +60,7 @@ class Context():
 
 
 def imguiCommands():  
-    from imguiCommands import imguiTrade
+    from editor import imguiTrade
     imgui.show_demo_window()
 
 

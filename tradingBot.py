@@ -89,7 +89,7 @@ class TradingBot():
     print((trade.loss/trade.entry-1)*100*trade.leverage)
 
   def update(self):      
-    try:
+    # try:
       for t in self.trades.values():
         for trade in t:
           # Adds subtrade if not exist
@@ -109,13 +109,13 @@ class TradingBot():
             s = trade.getTradeSign() #equality flips when multiplied with minus
             print(f"Pprice: {s*trade.subtrade.currentPrice} - Loss: {s*trade.getSubtradeThreshold()}")
             if s*trade.subtrade.currentPrice >= s*trade.getSubtradeThreshold():
-              self.endTrade(trade.subtrade)
+              self.client.close(trade.subtrade.symbol, trade.subtrade.id) #TODO: MOVE TO EXTERNAL FUNCTION 
               trade.subtrade = None
               print("Closing subtrade")
-    except KeyboardInterrupt:
-      return
-    except:
-      print("Connection lost, trying again...")
+    # except KeyboardInterrupt:
+      # return
+    # except:
+      # print("Connection lost, trying again...")
 
   def adjustParam(self, param, symbol, value):
     if param == 'loss':
@@ -126,12 +126,12 @@ class TradingBot():
 
 if __name__ == '__main__':
   bot = TradingBot()
-  symbol = "USTC-USDT"
+  symbol = "SOL-USDT"
   # symbol2 = "SHIB-USDT"
   price = float(bot.client.getPrice(symbol))
   # price2 = float(bot.client.getPrice(symbol2))
-  # bot.startTrade(symbol, 0.02744, 2.2, 0.0274, 1, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
+  bot.fetchTrade(symbol, 21.3551, 100, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
   # bot.startTrade(symbol2, price2, 2, price2 - price2*0.001, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
-  
+
   while 1:
     bot.update()
