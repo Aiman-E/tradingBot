@@ -11,6 +11,12 @@ class ORDER_CONFIG(Flag):
   SHORT = auto()
   MARKET = auto()
   LIMIT = auto()
+  
+  def __str__(self) -> str:
+    if self.value == 5:
+      return "market|long"
+    elif self.value == 6:
+      return "market|short"
 
 class BingxClient():
   APIKEY = ""
@@ -19,7 +25,7 @@ class BingxClient():
 
   def __init__(self) -> None:
     f = open('./credentials.txt')
-    credentials = json.load(f)['credentials']
+    credentials = json.load(f)['credentials']['bingx']
     self.APIKEY = credentials['APIKEY']
     self.SECRETKEY = credentials['SECRETKEY']
     print(f"apikey: {self.APIKEY}\nsecretkey:{self.SECRETKEY}")
@@ -71,11 +77,5 @@ class BingxClient():
 
 
 if __name__=='__main__':
-  symbol = "USTC-USDT"
-  client = BingxClient()
-  price = float(client.getPrice(symbol))
-  old = price
-
-  # orderid = client.openOrder(symbol, price, 1.9, ORDER_CONFIG.LONG | ORDER_CONFIG.MARKET)['orderId']
-  
-  
+  x = ORDER_CONFIG.MARKET | ORDER_CONFIG.SHORT
+  print(x.value)

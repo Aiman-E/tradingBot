@@ -37,14 +37,14 @@ def imguiCommands(*args, **kwargs):
     windowSize = imgui.get_window_size()
 
     # LIST
-    imgui.begin_child("Trades", windowSize[0] * 0.2, windowSize[1] * 0.4, True)
+    imgui.begin_child("Trades", windowSize[0] * 0.2, windowSize[1] * 0.6, True)
     editor.tradeList(bot)
     imgui.end_child()
 
     imgui.same_line(spacing=20)
 
     # DETIALS
-    imgui.begin_child("Details", 0.0, windowSize[1] * 0.4, True)
+    imgui.begin_child("Details", 0.0, windowSize[1] * 0.6, True)
 
     imgui.begin_child(editor._selectedTrade, windowSize[0] * 0.3, 0.0, True)
     editor.tradeDetails(bot)
@@ -54,7 +54,9 @@ def imguiCommands(*args, **kwargs):
     imgui.same_line(spacing=20)
 
     # Settings
+    imgui.begin_child("Settings", 0.0, 0.0, True)
     editor.tradeSettings(bot)
+    imgui.end_child()
 
     imgui.end_child() #-------END Details super section
 

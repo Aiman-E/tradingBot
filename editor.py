@@ -17,8 +17,7 @@ class Editor():
     imgui.text("Trades") 
     imgui.separator()
     for i in bot.trades: 
-      for j in bot.trades[i]:
-        if imgui.selectable(j.symbol, self._selectedTrade == i)[1]:
+        if imgui.selectable(bot.trades[i].symbol, self._selectedTrade == i)[1]:
           self._selectedTrade = i
       
       
@@ -29,30 +28,38 @@ class Editor():
     imgui.text("DETAILS")
     imgui.separator()
     
-    imgui.text(bot.trades[self._selectedTrade][0].symbol.capitalize())
+    imgui.text(bot.trades[self._selectedTrade].symbol.capitalize())
     imgui.separator()
-    imgui.text(f"ID: {str(bot.trades[self._selectedTrade][0].id)}")
-    imgui.text(f"Current Price: {bot.trades[self._selectedTrade][0].currentPrice}")
-    imgui.text(f"Entry: {bot.trades[self._selectedTrade][0].entry}")
-    imgui.text(f"Margin: {bot.trades[self._selectedTrade][0].margin}")
-    imgui.text(f"Volume: {bot.trades[self._selectedTrade][0].volume}")
-    imgui.text(f"Loss: {bot.trades[self._selectedTrade][0].loss}")
-    imgui.text(f"Leverage: {bot.trades[self._selectedTrade][0].leverage}")
-    imgui.text(f"config: {bot.trades[self._selectedTrade][0].config}")
-    imgui.text(f"Subtrade: {bot.trades[self._selectedTrade][0].subtrade}")
-    imgui.text(f"Subtrade Threshhold: {bot.trades[self._selectedTrade][0].subtradeThreshold}")
+    imgui.text(f"ID: {str(bot.trades[self._selectedTrade].id)}")
+    imgui.text(f"Current Price: {bot.trades[self._selectedTrade].currentPrice}")
+    imgui.text(f"Entry: {bot.trades[self._selectedTrade].entry}")
+    imgui.text(f"Margin: {bot.trades[self._selectedTrade].margin}")
+    imgui.text(f"Volume: {bot.trades[self._selectedTrade].volume}")
+    imgui.text(f"Loss: {bot.trades[self._selectedTrade].loss}")
+    imgui.text(f"Leverage: {bot.trades[self._selectedTrade].leverage}")
+    imgui.text(f"config: {bot.trades[self._selectedTrade].config}")
+    imgui.text(f"Subtrade: {bot.trades[self._selectedTrade].subtrade}")
+    imgui.text(f"Subtrade reopened: {bot.trades[self._selectedTrade].reopened}")
+    imgui.text(f"Subtrade Threshhold: {bot.trades[self._selectedTrade].subtradeThreshold}")
+    imgui.text(f"subtrade trigger PNL: {bot.trades[self._selectedTrade].subtradeTriggerPNL}")
+    imgui.text(f"PNL: {bot.trades[self._selectedTrade].getPNL()}")
+    imgui.text(f"Profit: {bot.trades[self._selectedTrade].getProfit()}")
 
 
   def tradeSettings(self, bot:TradingBot):
     if self._selectedTrade == '': return
 
-    loss = imgui.input_text(' : Loss', str(bot.trades[self._selectedTrade][0].loss), 256, flags = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+    loss = imgui.input_text(' : Loss', str(bot.trades[self._selectedTrade].loss), 256, flags = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
     if loss[0]: 
       bot.adjustParam("loss", self._selectedTrade, float(loss[1]))
 
-    threshold = imgui.input_text(' : Threshold', str(bot.trades[self._selectedTrade][0].subtradeThreshold), 256, flags = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+    threshold = imgui.input_text(' : Threshold', str(bot.trades[self._selectedTrade].subtradeThreshold), 256, flags = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
     if threshold[0]:
       bot.adjustParam("threshold", self._selectedTrade, float(threshold[1]))
+
+    triggerpnl = imgui.input_text(' : triggerPNL', str(bot.trades[self._selectedTrade].subtradeTriggerPNL), 256, flags = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE)
+    if triggerpnl[0]:
+      bot.adjustParam("triggerPNL", self._selectedTrade, float(triggerpnl[1]))
 
 
   def openOrder(self, bot:TradingBot, lock):
@@ -101,6 +108,13 @@ class Editor():
     if imgui.button("Fetch position"):
       lock.acquire()
       bot.fetchTrade(self._trade.symbol, float(self._trade.loss), int(self._trade.leverage), self._trade.config)
+      lock.release()
+
+    imgui.same_line(spacing=20)
+    
+    if imgui.button("Load positions"):
+      lock.acquire()
+      bot.load()
       lock.release()
 
   def closeOrder(self, bot:TradingBot, lock):

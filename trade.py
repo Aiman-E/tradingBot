@@ -12,6 +12,8 @@ class Trade():
   config = None
   subtrade = None
   subtradeThreshold = .2
+  subtradeTriggerPNL = 100
+  reopened = False
 
   def __init__(self, id, symbol, entry, margin, volume, loss, lev, config) -> None:
     self.id = id
@@ -54,6 +56,9 @@ class Trade():
   def setSubtradeThreshold(self, x):
     self.subtradeThreshold = x
 
+  def setSubtradeTriggerPNL(self, x):
+    self.subtradeTriggerPNL = x
+
   def getTradeSign(self):
     return 1 if self.config & ORDER_CONFIG.LONG else -1
 
@@ -61,6 +66,28 @@ class Trade():
     if self.config & ORDER_CONFIG.LONG:
       return self.subtrade.entry*(1+self.subtradeThreshold/100)
     return self.subtrade.entry*(1-self.subtradeThreshold/100)
-    
+  
+  def getPNL(self):
+    return (self.currentPrice/self.entry -1 ) * 100 * self.leverage * self.getTradeSign()
+  
+  def getProfit(self):
+    pnl = self.getPNL()
+    return self.margin*(pnl/100)
+ 
   def __str__(self) -> str:
-    return f"<TRADE ID:{self.id}> symbol:{self.symbol} - entry:{self.entry} - margin:{self.margin} - volume:{self.volume} - loss:{self.loss} - leverage:{self.leverage} - config:{self.config}"
+    s = {
+      "id": self.id,
+      "symbol": self.symbol,
+      "entry": self.entry,
+      "margin": self.margin, 
+      "volume": self.volume,
+      "loss": self.loss,
+      "leverage": self.leverage,
+      "config": str(self.config),
+      "subtrade": str(self.subtrade) if self.subtrade else "None",
+      "subtradeThreshold": self.subtradeThreshold,
+      "subtradeTriggerPNL": self.subtradeTriggerPNL,
+      "reopened": self.reopened, 
+    }
+    return str(s)
+  
