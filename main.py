@@ -28,47 +28,6 @@ def Proxy(target):
 
 BotProxy = Proxy(TradingBot)
 
-def imguiCommands(*args, **kwargs):
-    bot = args[1]['bot']
-    lock = args[1]['lock']
-    editor = args[1]['editor']
-
-    imgui.begin("Bot")
-    windowSize = imgui.get_window_size()
-
-    # LIST
-    imgui.begin_child("Trades", windowSize[0] * 0.2, windowSize[1] * 0.6, True)
-    editor.tradeList(bot)
-    imgui.end_child()
-
-    imgui.same_line(spacing=20)
-
-    # DETIALS
-    imgui.begin_child("Details", 0.0, windowSize[1] * 0.6, True)
-
-    imgui.begin_child(editor._selectedTrade, windowSize[0] * 0.3, 0.0, True)
-    editor.tradeDetails(bot)
-    editor.closeOrder(bot, lock)
-    imgui.end_child() #-------END details subsection
-
-    imgui.same_line(spacing=20)
-
-    # Settings
-    imgui.begin_child("Settings", 0.0, 0.0, True)
-    editor.tradeSettings(bot)
-    imgui.end_child()
-
-    imgui.end_child() #-------END Details super section
-
-
-    # Order
-    imgui.begin_child("OpenOrder", 0.0, 0.0, True)   
-    editor.openOrder(bot, lock)
-    imgui.end_child()
-
-    imgui.end()
-
-
 def main(b, lock, editor):  
     CONTEXT = Context()
     
@@ -91,7 +50,8 @@ if __name__=='__main__':
 
     while 1:
         LOCK.acquire()
-        BOT.update()
+        BOT.tick()
         LOCK.release()
         time.sleep(0.3)
+        
     
