@@ -10,39 +10,45 @@ class TradingBot():
 
     try:
       for trade in self.manager.trades.values():
+          s = trade.getTradeSign()
           # Adds subtrade if not exist
           if not trade.subtrade:
-            s = trade.getTradeSign()
             logger.debug(f"Price: {trade.currentPrice} - Loss: {trade.loss}")
             if s*trade.currentPrice <= s*trade.loss:
               if self.manager.startSubTrade(trade) == -1:
-                logger.warning("Subtrade not accomplished")
+                logger.warning(f"Subtrade({trade.symbol}) not accomplished")
                 return -1
-              logger.success("Subtrade accomplished")
+              logger.success(f"Subtrade({trade.symbol}) accomplished")
               continue
 
-          # check subtrade
+          # Check subtrade
           else:
-            s = trade.getTradeSign() #equality flips when multiplied with minus
             logger.debug(f"Price: {s*trade.subtrade.currentPrice} - threshold: {s*trade.getSubtradeThreshold()}")
 
-            if ((s*trade.subtrade.currentPrice >= s*trade.getSubtradeThreshold() and
-                not trade.reopened) or
-                trade.getPNL()>0.0):
+            # Close subtrade
+            if (s*trade.subtrade.currentPrice >= s*trade.getSubtradeThreshold()):
               if self.manager.endSubtrade(trade.symbol) == -1:
-                logger.warning("Closing subtrade failure")
+                logger.warning(f"Closing subtrade({trade.symbol}) failure")
                 return -1
-              logger.success("Subtrade closed")
+              logger.success(f"Subtrade({trade.symbol}) closed")
               trade.reopened = False
 
+            # Reopen subtrade
             elif trade.subtrade.getPNL() > trade.subtradeTriggerPNL:
               if self.manager.endSubtrade(trade.symbol) == -1:
-                logger.warning("Closing subtrade failure")
+                logger.warning(f"Reopening subtrade({trade.symbol}) failure")
                 return -1
               
-              logger.success("Subtrade closed")
+              logger.success(f"Subtrade({trade.symbol}) closed")
               trade.reopened = True
+              trade.setLoss(trade.currentPrice)
 
+              if self.manager.startSubTrade(trade) == -1:
+                logger.warning(f"Subtrade({trade.symbol}) not reopened")
+                return -1
+              logger.success(f"Subtrade({trade.symbol}) reopened")
+
+#2023-03-09 20:28:25.657
     except KeyboardInterrupt as e:
       logger.error(e)
     except Exception as e:
@@ -51,9 +57,9 @@ class TradingBot():
 
 if __name__ == '__main__':
   bot = TradingBot()
-  # bot.manager.startTrade("BONK-USDT", 0.000000476, 2, 0.0000005, 50, ORDER_CONFIG.MARKET | ORDER_CONFIG.SHORT)
-  bot.manager.load()
-  # bot.fetchTrade(symbol, 22387.0, 150, ORDER_CONFIG.SHORT  | ORDER_CONFIG.MARKET)
+  # bot.manager.startTrade("BTC-USDT", 20307.5, 2, 20305.5, 150, ORDER_CONFIG.MARKET | ORDER_CONFIG.LONG)
+  # bot.manager.load()
+  # bot.manager.fetchTrade("ADA-USDT", 22387.0, 100, ORDER_CONFIG.SHORT  | ORDER_CONFIG.MARKET)
   # bot.startTrade(symbol2, price2, 2, price2 - price2*0.001, 50, ORDER_CONFIG.LONG  | ORDER_CONFIG.MARKET)
   while 1:
     bot.tick()
