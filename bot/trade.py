@@ -1,4 +1,4 @@
-from bingxapi import ORDER_CONFIG
+from bot.bingxapi import ORDER_CONFIG
 
 class Trade():
   id = ""

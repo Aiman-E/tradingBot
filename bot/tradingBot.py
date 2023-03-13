@@ -1,9 +1,43 @@
-from tradeManager import *
+from bot.tradeManager import *
 
 class TradingBot():
   def __init__(self) -> None:
     self.manager = TradeManager()
-    logger.add("./log.txt")
+    logger.add("log.txt")
+
+  def openOrder(self, *args, **kwargs):
+    s= ORDER_CONFIG.MARKET
+    a = 's'
+    s|= ORDER_CONFIG.LONG if kwargs['side'].lower() == 'long' else ORDER_CONFIG.SHORT
+    self.manager.startTrade(kwargs['symbol'],
+                            kwargs['entry'],
+                            kwargs['margin'],
+                            kwargs['loss'],
+                            kwargs['leverage'],
+                            s)
+
+  def fetchOrder(self, *args, **kwargs):
+    s= ORDER_CONFIG.MARKET
+    a = 's'
+    s|= ORDER_CONFIG.LONG if kwargs['side'].lower() == 'long' else ORDER_CONFIG.SHORT
+    self.manager.fetchTrade(kwargs['symbol'],
+                            kwargs['loss'],
+                            kwargs['leverage'],
+                            s)
+  
+  def loadTrades(self):
+    self.manager.load()
+    return [str(i) for i in self.manager.trades.keys()]
+  
+  def tradeDetails(self, x):
+    if x:
+      return self.manager.trades[x]
+  
+  def tradeEdit(self, param, symbol, value):
+    self.manager.adjustParam(param, symbol, value)
+
+  def tradeClose(self, symbol):
+    self.manager.endTrade(symbol)
 
   def tick(self):      
     if self.manager.updatePrices() == -1: return -1
@@ -48,9 +82,6 @@ class TradingBot():
                 return -1
               logger.success(f"Subtrade({trade.symbol}) reopened")
 
-#2023-03-09 20:28:25.657
-    except KeyboardInterrupt as e:
-      logger.error(e)
     except Exception as e:
       logger.error(e)
     

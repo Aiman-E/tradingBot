@@ -1,7 +1,7 @@
 import ast
 
-from bingxapi import *
-from trade import *
+from bot.bingxapi import *
+from bot.trade import *
 
 class TradeManager():
   client = None
