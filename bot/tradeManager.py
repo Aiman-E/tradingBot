@@ -5,6 +5,7 @@ from bot.trade import *
 
 class TradeManager():
   client = None
+  FEE = 0.05
   trades = {}
 
   def __init__(self) -> None:
@@ -22,6 +23,7 @@ class TradeManager():
         return -1
       
       i.setCurrentPrice(price)
+      self.calculateActualPNL(i)
       if i.subtrade:
         i.subtrade.setCurrentPrice(price)
 
@@ -123,7 +125,7 @@ class TradeManager():
     return 0
 
   def startSubTrade(self, trade):
-    logger.debug(f"Opening subtrade: {trade.symbol} / {str(trade.config)}")
+    logger.debug(f"Opening subtrade({trade.reopened+1}): {trade.symbol} / {str(trade.config)}")
     try:
       self.client.openOrderWithVolume(trade.symbol, 
         trade.loss, 
@@ -141,7 +143,9 @@ class TradeManager():
       return -1
     
     trade.setSubtrade(t.subtrade)
-    
+    trade.reopened += 1
+    self.calculateActualPNL(trade)
+
     self.updateDatabase()
     return 0
 
@@ -168,6 +172,8 @@ class TradeManager():
 
     try:
       self.client.close(symbol, self.trades[symbol].subtrade.id)
+      
+      self.trades[symbol].accumulatingSubtradePNL += self.trades[symbol].subtrade.getPNL()
       self.trades[symbol].setSubtrade(None)
 
     except TimeoutError as e:
@@ -234,7 +240,10 @@ class TradeManager():
       logger.debug("Updating triggerPNL")
       self.trades[symbol].setSubtradeTriggerPNL(value)
       self.updateDatabase()
-  
+
+  def calculateActualPNL(self, trade):
+    feeLosses = 2*trade.reopened*self.FEE*trade.leverage
+    trade.actualPNL = trade.getPNL() + trade.accumulatingSubtradePNL - feeLosses
 
 if __name__=='__main__':
   manager = TradeManager()

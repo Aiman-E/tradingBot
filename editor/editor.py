@@ -88,6 +88,9 @@ class Editor(QApplication):
     def setTradeCloseCallback(self, func):
         self.tradeDetails.setTradeCloseCallback(func)
 
+    def setStatsCallback(self, func):
+        self.tradeDetails.setStatsCallback(func)
+
     def clearSelectedTrade(self):
         self.selectedTrade = ''
 

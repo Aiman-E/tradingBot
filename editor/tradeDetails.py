@@ -281,6 +281,7 @@ class TradeDetails(QFrame):
         self.horizontalLayout.addLayout(self.verticalLayout)
         
         
+        # Subtrade
         self.verticalLayout2 = QVBoxLayout() # I know shitty naming conversions, but I'm lazy :')
         sizePolicy = QSizePolicy()
         sizePolicy.setHorizontalPolicy(QSizePolicy.Minimum)
@@ -295,6 +296,45 @@ class TradeDetails(QFrame):
 
         self.verticalLayout2Spacer = QSpacerItem(40, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.verticalLayout2.addItem(self.verticalLayout2Spacer)
+
+        # Stats------------------
+        # PNL
+        self.pnlLayout = QHBoxLayout()
+
+        self.pnlLabel = QLabel(self)
+        self.pnlLabel.setText(u"PNL:")
+        self.pnlLayout.addWidget(self.pnlLabel)
+
+        self.pnlValue = QLabel(u"0")
+        self.pnlLayout.addWidget(self.pnlValue)
+
+        self.actualPnlValue = QLabel(u" (0)")
+        self.pnlLayout.addWidget(self.actualPnlValue)
+
+        self.pnlSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.pnlLayout.addItem(self.pnlSpacer)
+
+        self.verticalLayout2.addLayout(self.pnlLayout)
+
+        # Profit
+        self.profitLayout = QHBoxLayout()
+
+        self.profitLabel = QLabel(self)
+        self.profitLabel.setText(u"profit:")
+        self.profitLayout.addWidget(self.profitLabel)
+
+        self.profitValue = QLabel(u"0")
+        self.profitLayout.addWidget(self.profitValue)
+
+        self.actualProfitValue = QLabel(u" (0)")
+        self.profitLayout.addWidget(self.actualProfitValue)
+
+        self.profitSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.profitLayout.addItem(self.profitSpacer)
+
+        self.verticalLayout2.addLayout(self.profitLayout)
+
+
         self.horizontalLayout.addLayout(self.verticalLayout2)
 
     def setTradeDetailsCallback(self, func):
@@ -305,6 +345,9 @@ class TradeDetails(QFrame):
 
     def setTradeCloseCallback(self, func):
         self.tradeCloseCallback = func
+
+    def setStatsCallback(self, func):
+        self.statsCallback = func
 
     def _tradeDetailsEditCallback(self):
         self.lock.lock()
@@ -334,6 +377,15 @@ class TradeDetails(QFrame):
         self.tradeCloseCallback(self.symbolLabel.text())
         self.lock.unlock()
 
+    def _statsCallback(self):
+        stats = self.statsCallback(self.symbolLabel.text())
+
+        self.pnlValue.setText(str(round(stats['pnl'][0], 4)))
+        self.actualPnlValue.setText(f" ({round(stats['pnl'][1], 4)})")
+
+        self.profitValue.setText(str(round(stats['profit'][0], 4)))
+        self.actualProfitValue.setText(f" ({round(stats['profit'][0], 4)})")
+
     def update(self, x):
         t = self.tradeDetailsCallback(x)
         self.IDValue.setText(str(t.id))
@@ -355,5 +407,5 @@ class TradeDetails(QFrame):
             self.subtradeWidget.update(t.subtrade)
         else:
             self.subtradeWidget.hide()
-            
 
+        self._statsCallback()

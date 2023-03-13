@@ -39,6 +39,13 @@ class TradingBot():
   def tradeClose(self, symbol):
     self.manager.endTrade(symbol)
 
+  def getStats(self, symbol):
+    pnl = self.manager.trades[symbol].getPNL()
+    profit = self.manager.trades[symbol].getProfit()
+    actualPNL = self.manager.trades[symbol].actualPNL
+    actualprofit = self.manager.trades[symbol].margin*(actualPNL/100)
+    return {"pnl":[pnl, actualPNL], "profit":[profit, actualprofit]}
+
   def tick(self):      
     if self.manager.updatePrices() == -1: return -1
 
@@ -65,7 +72,6 @@ class TradingBot():
                 logger.warning(f"Closing subtrade({trade.symbol}) failure")
                 return -1
               logger.success(f"Subtrade({trade.symbol}) closed")
-              trade.reopened = False
 
             # Reopen subtrade
             elif trade.subtrade.getPNL() > trade.subtradeTriggerPNL:
@@ -74,7 +80,6 @@ class TradingBot():
                 return -1
               
               logger.success(f"Subtrade({trade.symbol}) closed")
-              trade.reopened = True
               trade.setLoss(trade.currentPrice)
 
               if self.manager.startSubTrade(trade) == -1:

@@ -34,6 +34,7 @@ if __name__=='__main__':
     editor.setDetailsCallback(BOT.tradeDetails)
     editor.setDetailsEditCallback(BOT.tradeEdit)
     editor.setTradeCloseCallback(BOT.tradeClose)
+    editor.setStatsCallback(BOT.getStats)
 
 
     while 1:

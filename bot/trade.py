@@ -13,7 +13,9 @@ class Trade():
   subtrade = None
   subtradeThreshold = .2
   subtradeTriggerPNL = 100
-  reopened = False
+  actualPNL = 0.0
+  accumulatingSubtradePNL = 0.0
+  reopened = 0
 
   def __init__(self, id, symbol, entry, margin, volume, loss, lev, config) -> None:
     self.id = id
@@ -87,6 +89,8 @@ class Trade():
       "subtrade": str(self.subtrade) if self.subtrade else "None",
       "subtradeThreshold": self.subtradeThreshold,
       "subtradeTriggerPNL": self.subtradeTriggerPNL,
+      "actualPNL": self.actualPNL,
+      "accumulatingSubtradePNL": self.accumulatingSubtradePNL,
       "reopened": self.reopened, 
     }
     return str(s)
