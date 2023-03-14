@@ -384,7 +384,7 @@ class TradeDetails(QFrame):
         self.actualPnlValue.setText(f" ({round(stats['pnl'][1], 4)})")
 
         self.profitValue.setText(str(round(stats['profit'][0], 4)))
-        self.actualProfitValue.setText(f" ({round(stats['profit'][0], 4)})")
+        self.actualProfitValue.setText(f" ({round(stats['profit'][1], 4)})")
 
     def update(self, x):
         t = self.tradeDetailsCallback(x)

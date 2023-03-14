@@ -71,7 +71,8 @@ class TradeManager():
             trade.setSubtradeThreshold(j['subtradeThreshold'])
             trade.setSubtradeTriggerPNL(j['subtradeTriggerPNL'])
             trade.reopened = j['reopened']
-
+            trade.accumulatingSubtradePNL = j['accumulatingSubtradePNL']
+            
             if j['subtrade'] != None:
               subtrade = Trade(
                 j['subtrade']['id'],
