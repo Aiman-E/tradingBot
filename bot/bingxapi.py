@@ -32,11 +32,11 @@ class BingxClient():
     logger.debug(f"\n\tapikey: {self.APIKEY}\n\tsecretkey:{self.SECRETKEY}")
     self.CLIENT = Perpetual(self.APIKEY, self.SECRETKEY)
   
-  # @timeout(3)
+  @timeout(3, use_signals=False)
   def getPrice(self, symbol) -> str:
     return market.latest_price(self.CLIENT, symbol)["tradePrice"]
 
-  # @timeout(3)
+  @timeout(3, use_signals=False)
   def openOrder(self, symbol, entry, amount, config):
     value = amount/entry
     if config == ORDER_CONFIG.LONG | ORDER_CONFIG.MARKET:
@@ -51,7 +51,7 @@ class BingxClient():
     elif config == ORDER_CONFIG.SHORT | ORDER_CONFIG.LIMIT:
       return self.CLIENT.place_order(symbol, "Ask", entry, value, "Limit", "Open")
 
-  # @timeout(3)
+  @timeout(3, use_signals=False)
   def openOrderWithVolume(self, symbol, entry, amount, config):
     if config == ORDER_CONFIG.LONG | ORDER_CONFIG.MARKET:
       return self.CLIENT.place_order(symbol, "Bid", entry, amount, "Market", "Open")
@@ -65,18 +65,18 @@ class BingxClient():
     elif config == ORDER_CONFIG.SHORT | ORDER_CONFIG.LIMIT:
       return self.CLIENT.place_order(symbol, "Ask", entry, amount, "Limit", "Open")
 
-  # @timeout(3)
+  @timeout(3, use_signals=False)
   def trim(self, symbol, entry, amount, side):
     if side == ORDER_CONFIG.LONG:
       return self.CLIENT.place_order(symbol, "Ask", entry, amount/entry, "Market", "Close")
     elif side == ORDER_CONFIG.SHORT:
       return self.CLIENT.place_order(symbol, "Bid", entry, amount/entry, "Market", "Close")  
 
-  # @timeout(3)
+  @timeout(3, use_signals=False)
   def close(self, symbol, id):
     return self.CLIENT.close_position(symbol, id)
 
-  # @timeout(3)
+  @timeout(3, use_signals=False)
   def getPositionDetails(self, symbol):
     return self.CLIENT.positions(symbol)
 
